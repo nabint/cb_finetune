@@ -9,3 +9,4 @@ wheels/
 # Virtual environments
 .venv
 qwen2.5-0.5b-instruct
+unsloth_compiled_cache
