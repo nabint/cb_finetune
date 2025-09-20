@@ -10,3 +10,4 @@ wheels/
 .venv
 qwen2.5-0.5b-instruct
 unsloth_compiled_cache
+Qwen2.5-1.5B-Instruct
