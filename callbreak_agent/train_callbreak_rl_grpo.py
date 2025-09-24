@@ -1,4 +1,5 @@
 import re
+from callbreak_agent.utils import extract_card, normalize_texts
 import torch
 import random
 import traceback
@@ -8,38 +9,6 @@ from unsloth import FastLanguageModel
 from trl import GRPOTrainer, GRPOConfig
 from peft import PeftModel, prepare_model_for_kbit_training
 
-# Utilities
-
-CARD_RE = re.compile(
-    r"(?:Ace|King|Queen|Jack|10|9|8|7|6|5|4|3|2) of (?:Clubs|Diamonds|Hearts|Spades)",
-    re.IGNORECASE,
-)
-
-
-def extract_card(text: str):
-    if not text:
-        return None
-    m = CARD_RE.search(text)
-    return m.group(0) if m else None
-
-
-def normalize_texts(values, tokenizer):
-    """Normalize completions to list of text strings."""
-    if isinstance(values, torch.Tensor):
-        return [
-            tokenizer.decode(row.tolist(), skip_special_tokens=True) for row in values
-        ]
-    if isinstance(values, (list, tuple)):
-        out = []
-        for v in values:
-            if isinstance(v, torch.Tensor):
-                out.append(tokenizer.decode(v.tolist(), skip_special_tokens=True))
-            elif isinstance(v, list) and v and isinstance(v[0], int):
-                out.append(tokenizer.decode(v, skip_special_tokens=True))
-            else:
-                out.append(str(v))
-        return out
-    return [str(values)]
 
 
 def broadcast(value, length):
@@ -50,7 +19,7 @@ def broadcast(value, length):
 # Load Data
 
 print("Loading dataset...")
-raw = load_dataset("json", data_files={"train": "ai_polished_reasons_2.jsonl"})["train"]
+raw = load_dataset("json", data_files={"train": "ai_polished_reasons.jsonl"})["train"]
 
 
 def format_data(example):
@@ -94,7 +63,7 @@ base_model.config.use_cache = True
 base_model = prepare_model_for_kbit_training(base_model)
 
 # Load LoRA adapter
-lora_path = "./callbreak_agent/trained_model/callbreak_rl_grpo"
+lora_path = "./callbreak_agent/trained_model/best_card_lora"
 try:
     model = PeftModel.from_pretrained(base_model, lora_path, is_trainable=True)
     print(f"Loaded LoRA from: {lora_path}")
@@ -186,6 +155,7 @@ def reward_function(
                 print(
                     f"TC {str(true_card).lower()} PC {pred_card.lower()} EQ: {pred_card.lower() == str(true_card).lower()}"
                 )
+                # print(f"Dataset Throw Card: {true_card} | Model Throw Card: {pred_card}\n")
                 print(f"Completion text:{comp_text_l}\n")
             else:
                 print(f"Empty pred card {comp_text_l}\n")
@@ -233,9 +203,9 @@ def reward_function(
 # Trainer
 
 grpo_config = GRPOConfig(
-    learning_rate=5e-5,
+    learning_rate=5e-6,
     num_generations=4,
-    max_steps=300,
+    max_steps=200,
     loss_type="grpo",
     epsilon=0.2,
 )

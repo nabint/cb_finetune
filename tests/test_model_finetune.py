@@ -12,7 +12,7 @@ model = AutoModelForCausalLM.from_pretrained(
     finetuned_dir,
     device_map="auto",
     torch_dtype=torch.bfloat16,  # Match training precision
-    trust_remote_code=True
+    trust_remote_code=True,
 )
 model.eval()
 
@@ -21,14 +21,15 @@ tokenizer = AutoTokenizer.from_pretrained(finetuned_dir)
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
+
 # Function to generate responses using the chat template
 def generate_response(prompt: str) -> str:
     # Use the same system prompt as during training
     system_prompt = "You are an expert callbreak card game master with deep knowledge of rules, strategies, scoring, and advanced gameplay techniques. Provide comprehensive, accurate, and insightful responses about callbreak gameplay, rules clarifications, strategic advice, and game mechanics. Always be precise and educational in your explanations."
-    
+
     # Format using the chat template used during training
     text = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
-    
+
     inputs = tokenizer(text, return_tensors="pt").to(device)
 
     with torch.no_grad():
@@ -47,8 +48,9 @@ def generate_response(prompt: str) -> str:
     # Extract only the assistant's response
     if "<|im_start|>assistant\n" in decoded:
         decoded = decoded.split("<|im_start|>assistant\n")[-1].strip()
-        
+
     return decoded
+
 
 if __name__ == "__main__":
     print("Model loaded. Type 'exit' to quit.\n")
@@ -81,7 +83,6 @@ if __name__ == "__main__":
         - Deterministic, concise, Callbreak-only. No meta-talk, no extra lines, no non-Callbreak content.
     """
 
-
     q_input = """
         Cards already played in the round (in order): 2 of Clubs, 8 of Clubs Leading card: 8 of Clubs. 
         My legal hand cards are: K of Clubs, A of Clubs, 10 of Clubs. 
@@ -90,13 +91,3 @@ if __name__ == "__main__":
     """
     response = generate_response(agent_context + q_input)
     print("\nLLM Response:\n", response, "\n")
-
-    # while True:
-    #     user_input = input("Enter your prompt: ")
-    
-    #     if user_input.strip().lower() == "exit":
-    #         print("Exiting...")
-    #         break
-
-    #     response = generate_response(user_input)
-    #     print("\nLLM Response:\n", response, "\n")
