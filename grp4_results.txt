@@ -1,0 +1,18 @@
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+INFO 09-24 04:24:10 [__init__.py:216] Automatically detected platform cuda.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+Loading dataset...
+Dataset size: 10312
+Loading model...
+==((====))==  Unsloth 2025.8.10: Fast Qwen2 patching. Transformers: 4.56.0. vLLM: 0.10.2.
+   \\   /|    NVIDIA GeForce RTX 4070. Num GPUs = 1. Max memory: 11.595 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.8.0+cu128. CUDA: 8.9. CUDA Toolkit: 12.8. Triton: 3.4.0
+\        /    Bfloat16 = TRUE. FA [Xformers = 0.0.32.post1. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+Loaded LoRA from: ./callbreak_agent/trained_model/callbreak_rl_grpo_3
+Trainable parameters: 4358144
+Creating trainer...
+Testing generation...
+Generation test failed: 'NoneType' object has no attribute 'shape'
+Starting training...

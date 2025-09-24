@@ -50,7 +50,7 @@ def broadcast(value, length):
 # Load Data
 
 print("Loading dataset...")
-raw = load_dataset("json", data_files={"train": "ai_polished_reasons.jsonl"})["train"]
+raw = load_dataset("json", data_files={"train": "ai_polished_reasons_2.jsonl"})["train"]
 
 
 def format_data(example):
@@ -94,7 +94,7 @@ base_model.config.use_cache = True
 base_model = prepare_model_for_kbit_training(base_model)
 
 # Load LoRA adapter
-lora_path = "./callbreak_agent/trained_model/best_card_lora"
+lora_path = "./callbreak_agent/trained_model/callbreak_rl_grpo"
 try:
     model = PeftModel.from_pretrained(base_model, lora_path, is_trainable=True)
     print(f"Loaded LoRA from: {lora_path}")
@@ -186,7 +186,6 @@ def reward_function(
                 print(
                     f"TC {str(true_card).lower()} PC {pred_card.lower()} EQ: {pred_card.lower() == str(true_card).lower()}"
                 )
-                # print(f"Dataset Throw Card: {true_card} | Model Throw Card: {pred_card}\n")
                 print(f"Completion text:{comp_text_l}\n")
             else:
                 print(f"Empty pred card {comp_text_l}\n")
@@ -234,9 +233,9 @@ def reward_function(
 # Trainer
 
 grpo_config = GRPOConfig(
-    learning_rate=5e-6,
+    learning_rate=5e-5,
     num_generations=4,
-    max_steps=200,
+    max_steps=300,
     loss_type="grpo",
     epsilon=0.2,
 )
